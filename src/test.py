@@ -1,5 +1,8 @@
 import numpy as np
 from matrix_factorization import matrix_factorization
+from graph_init import *
+from similarity import *
+from create_R import *
 
 R = [
      [5,3,0,1],
@@ -11,6 +14,8 @@ R = [
 
 R = np.array(R)
 
+R = create_R()
+
 N = len(R)
 M = len(R[0])
 K = 2
@@ -21,5 +26,14 @@ Q = np.random.rand(M,K)
 nP, nQ = matrix_factorization(R, P, Q, K)
 nR = np.dot(nP, nQ.T)
 
-print(nP)
+print(nP, "\n\n", nQ)
 
+lp = LaplacianParams()
+
+sim = similarity(R)
+
+print(sim)
+
+L = build_laplacian(sim,lp)
+
+print(L)

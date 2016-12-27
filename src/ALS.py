@@ -7,7 +7,7 @@ code can be run in parallel in local with setting parallel = True
 import numpy as np
 from multiprocessing import Pool
 from scipy.sparse import diags, csr_matrix
-from rslearn.utils import sparse_matrix
+from utils import sparse_matrix
 import pandas as pd
 from copy import deepcopy
 
