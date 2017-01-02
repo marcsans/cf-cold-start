@@ -3,16 +3,16 @@
 
 # In[24]:
 
-def create_R(moviesstr = "../data/ml-latest-small/movies.csv", ratingsstr = "../data/ml-latest-small/ratings.csv"):
+def create_R(ratingsstr = "../data/ml-latest-small/ratings.csv"):
     
     import numpy as np
     import pandas as pd
     
-    movies = pd.read_csv(moviesstr)
     ratings = pd.read_csv(ratingsstr)
     
-    ratings['TrueMovieId'] = ratings['movieId'].map(lambda i: movies[movies.movieId == i].index.tolist()[0])
-    R = np.zeros([len(np.unique(ratings['userId'])),len(movies)])
+    uniqueRatings = np.unique(ratings['movieId'])
+    ratings['TrueMovieId'] = ratings['movieId'].map(lambda i: np.argmin(abs(uniqueRatings - i)))
+    R = np.zeros([len(np.unique(ratings['userId'])),len(uniqueRatings)])
     R_dict = {"Users": np.empty([0]), "Movies": np.empty([0]), "Ratings": np.empty([0])}
     
     ratingsnp = np.asarray(ratings)
