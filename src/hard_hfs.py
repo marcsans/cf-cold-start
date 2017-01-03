@@ -18,7 +18,7 @@ def hfs(X, Y, graph_params=GraphParams(), laplacian_params=LaplacianParams(), mo
         return online_hfs(X, Y, graph_params, laplacian_params)
 
 
-def simple_hfs(X, Y, graph_params, laplacian_params):
+def simple_hfs(X, Y, L, W):
     n_samples = len(X)
     n_classes = len(np.unique(Y)) - 1
 
@@ -31,8 +31,8 @@ def simple_hfs(X, Y, graph_params, laplacian_params):
         y[i, int(Y[l_idx[i]] - 1)] = 1
     # Compute solution
     f_l = y
-    W = build_graph(X, graph_params)
-    L = build_laplacian(W, laplacian_params)
+    #W = build_graph(X, graph_params)
+    #L = build_laplacian(W, laplacian_params)
     f_u = inv(L[[[x] for x in u_idx], u_idx]).dot(W[[[x] for x in u_idx], l_idx]).dot(f_l)
 
     # Compute label assignment
@@ -67,7 +67,7 @@ def soft_hfs(X, Y, c_l, c_u, L):
     Q = L + gamma*np.eye(len(L))
     f = inv(inv(C).dot(Q) + np.eye(len(L))).dot(y)
 
-    labels = f.T
+    labels = f.argmax(axis=1)
     
     return labels
 
