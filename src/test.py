@@ -145,21 +145,9 @@ ans = als.fit(R_dict)
 # print(nP, "\n\n", nQ)
 
 
-# In[31]:
-
-als.U
-
-
-# In[32]:
-
-als.V
-
-
-# In[33]:
+# In[63]:
 
 R_rec = np.dot(als.U,np.transpose(als.V))
-print((R_rec-np.min(R_rec))*5/np.max(R_rec-np.min(R_rec)))
-print(R_rec)
 
 
 # In[34]:
@@ -321,6 +309,13 @@ print(RMSE(R_rec_trans,R_rec))
 # In[62]:
 
 print(RMSE(R,R_rec_trans))
+
+
+# In[65]:
+
+print(RMSEvec(ground_truth,R_rec_trans[:,321]))
+print(RMSEvec(ground_truth,R_rec[:,321]))
+print(RMSEvec(ground_truth,R_barre[:,321]))
 
 
 # In[ ]:
