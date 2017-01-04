@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[19]:
+# In[97]:
 
 get_ipython().magic('load_ext autoreload')
 get_ipython().magic('autoreload 2')
@@ -18,7 +18,7 @@ import copy
 import matplotlib.pyplot as plt
 
 
-# In[20]:
+# In[98]:
 
 def RMSE(ground, predict):
     
@@ -49,7 +49,7 @@ def meanError(ground_truth,new_res):
     return np.mean(abs((new_res - ground_truth)[ground_truth!=0]))
 
 
-# In[21]:
+# In[99]:
 
 def dictfromR(R):
 
@@ -65,7 +65,7 @@ def dictfromR(R):
     return R_dict
 
 
-# In[22]:
+# In[100]:
 
 # R = [
 #      [5,3,0,1],
@@ -82,7 +82,7 @@ R,R_dict = create_R()
 print(R_dict)
 
 
-# In[23]:
+# In[101]:
 
 P_dict = copy.deepcopy(R_dict)
 P_dict["Ratings"] = np.ones([len(R_dict["Ratings"])])
@@ -90,12 +90,12 @@ P = R > 0
 print(P)
 
 
-# In[24]:
+# In[102]:
 
 np.argmax([np.sum(P[i,:] for i in range(len(P)))][0])
 
 
-# In[25]:
+# In[103]:
 
 to_keep = 3
 sel = np.where(R[:,321] != 0)[0]
@@ -103,29 +103,29 @@ np.random.shuffle(sel)
 sel = sel[:len(sel)-to_keep]
 
 
-# In[26]:
+# In[104]:
 
 ground_truth = copy.deepcopy(R[:,321])
 R[sel,321] = 0
 
 
-# In[27]:
+# In[105]:
 
 np.sum(R[:,321] != 0)
 
 
-# In[28]:
+# In[106]:
 
 R_dictCopy = copy.deepcopy(R_dict)
 R_dict = dictfromR(R)
 
 
-# In[29]:
+# In[107]:
 
 np.where(R_dict['Movies'] == 321)
 
 
-# In[30]:
+# In[108]:
 
 N = len(R)
 M = len(R[0])
@@ -145,33 +145,33 @@ ans = als.fit(R_dict)
 # print(nP, "\n\n", nQ)
 
 
-# In[63]:
+# In[109]:
 
 R_rec = np.dot(als.U,np.transpose(als.V))
 
 
-# In[34]:
+# In[110]:
 
 print(RMSE(R,R_rec))
 print(RMSE(R,(R_rec-np.min(R_rec))*5/np.max(R_rec-np.min(R_rec))))
 
 
-# In[35]:
+# In[111]:
 
 print(RMSEvec(ground_truth, R_rec[:,321]))
 
 
-# In[36]:
+# In[112]:
 
 R
 
 
-# In[37]:
+# In[113]:
 
 np.max(R_rec)
 
 
-# In[38]:
+# In[114]:
 
 lp = LaplacianParams()
 
@@ -182,14 +182,14 @@ sim = build_graph(als.U, GraphParams())
 print(sim)
 
 
-# In[39]:
+# In[115]:
 
 L = build_laplacian(sim,lp)
 
 print(L.shape)
 
 
-# In[40]:
+# In[116]:
 
 supp = 100
 test_vec = copy.deepcopy(R[:,321])*2
@@ -197,36 +197,36 @@ test_vec = copy.deepcopy(R[:,321])*2
 test_vec.shape
 
 
-# In[41]:
+# In[117]:
 
 # test_vec
 
 
-# In[42]:
+# In[118]:
 
 hfs0, confidence = simple_hfs(als.U, test_vec, L, sim)
 # hfs0/2
 
 
-# In[43]:
+# In[119]:
 
 maxconfidences = np.array([max(confidence[i,:]) for i in range(len(confidence))])
 
 
-# In[44]:
+# In[120]:
 
 lim = np.percentile(maxconfidences, 1)
 print(RMSEvec(ground_truth*(maxconfidences > lim),hfs0/2))
 print(RMSEvec(ground_truth*(maxconfidences > lim), R_rec[:,321]))
 
 
-# In[45]:
+# In[121]:
 
 print(meanError(ground_truth,hfs0/2))
 print(meanError(ground_truth,R_rec[:,321]))
 
 
-# In[47]:
+# In[122]:
 
 # elmnt = 321
 # val = []
@@ -241,7 +241,7 @@ print(meanError(ground_truth,R_rec[:,321]))
 # plt.plot(range(1,671,10),val)
 
 
-# In[48]:
+# In[136]:
 
 lhfs = []
 lconf = []
@@ -251,7 +251,7 @@ for i in range(len(R[0])):
     hfs0, confidence = simple_hfs(als.U, R[:,i]*2, L, sim)
     maxconfidences = np.array([max(confidence[i,:]) for i in range(len(confidence))])
     
-    lim = np.percentile(maxconfidences, 90)
+    lim = np.percentile(maxconfidences, 95)
     
     lhfs.append(hfs0/2)
     lconf.append(maxconfidences > lim)
@@ -263,33 +263,33 @@ confs = np.vstack(lconf).T
 # R_barre[R_barre > 5] = 5
 
 
-# In[49]:
+# In[137]:
 
 R_barre_limited = R_barre * confs
 
 
-# In[50]:
+# In[138]:
 
 np.unique(R_barre_limited)
 
 
-# In[51]:
+# In[139]:
 
 print(RMSE(R_barre_limited,R_rec))
 
 
-# In[52]:
+# In[140]:
 
 R_barre_final = copy.deepcopy(R_barre_limited)
 R_barre_final[R != 0] = 0
 
 
-# In[53]:
+# In[141]:
 
-R_dict_barre = dictfromR(R_barre_final)
+# R_dict_barre = dictfromR(R_barre_final)
 
 
-# In[59]:
+# In[145]:
 
 N = len(R)
 M = len(R[0])
@@ -297,25 +297,38 @@ K = 4
 
 als_trans = ALS(K,N,M,"Users","Movies","Ratings",lbda = 0.1,lbda2 = 0.1)
 print("Als created")
-ans = als_trans.fitTransductive(R_dict,R_dict_barre,C1=1,C2=0.1)
+
+ans = als_trans.fitTransductive(R_dict,R_barre_final,C1=1,C2=0.2)
 
 
-# In[60]:
+# In[146]:
 
 R_rec_trans = np.dot(als_trans.U,np.transpose(als_trans.V))
 print(RMSE(R_rec_trans,R_rec))
 
 
-# In[62]:
-
-print(RMSE(R,R_rec_trans))
-
-
-# In[65]:
+# In[147]:
 
 print(RMSEvec(ground_truth,R_rec_trans[:,321]))
 print(RMSEvec(ground_truth,R_rec[:,321]))
 print(RMSEvec(ground_truth,R_barre[:,321]))
+
+
+# 0.930864602802
+# 0.97011494657
+# 1.00036650175 (90 1 0.1)
+# 
+# 0.910201784408
+# 0.97011494657
+# 1.00036650175 (90 1 0.5)
+# 
+# 0.931048133417
+# 0.97011494657
+# 1.00036650175 (95 1 0.5)
+
+# In[135]:
+
+R_barre
 
 
 # In[ ]:

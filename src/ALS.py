@@ -155,7 +155,7 @@ class ALS(object):
             beta_V = np.ones(self.num_items)
             
         self.train = sparse_matrix(train,n = self.num_users, p = self.num_items,names=self.names)
-        trans_mat = sparse_matrix(trans,n = self.num_users, p = self.num_items,names=self.names)
+        trans_mat = csr_matrix(trans)
         
         self.U = U0
         self.V = V0
