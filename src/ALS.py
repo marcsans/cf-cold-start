@@ -134,6 +134,72 @@ class ALS(object):
             if self.verbose:
                 print('end iteration',it+1)
     
+    def fitTransductive(self,train, trans, C1, C2, U0=None,V0=None,beta_V=None):
+        """
+        Learn factors from training set and transductive training set. User and item factors are
+        fitted alternately.
+        
+        Parameters
+        ==========
+        train : dict
+            keys contain col, row and val for column index, row index and value.
+        trans : dict
+            keys contain col, row and val for column index, row index and value.
+        U0, V0 : array-like
+            initialization of the decomposition. If None, initiate with random values
+        """
+        if self.seed is not None:
+            np.random.seed(self.seed)
+        
+        if beta_V is None:
+            beta_V = np.ones(self.num_items)
+            
+        self.train = sparse_matrix(train,n = self.num_users, p = self.num_items,names=self.names)
+        trans_mat = sparse_matrix(trans,n = self.num_users, p = self.num_items,names=self.names)
+        
+        self.U = U0
+        self.V = V0
+            
+        if self.U is None:
+            #self.U = self.init_factors(self.num_users,False)
+            self.U = np.random.normal(size=(self.num_users,self.d))
+        if self.V is None:
+            #self.V = self.init_factors(self.num_items)
+            self.V = np.random.normal(size=(self.num_items,self.d))
+        for it in np.arange(self.num_iters):
+            for u in range(self.num_users):
+                indices = self.train[u].nonzero()[1]
+                indicesTrans = trans_mat[u].nonzero()[1]
+                if indices.size:
+                    R_u = self.train[u,indices]
+                    R_uTrans = trans_mat[u,indicesTrans]
+                    self.U[u,:] = self.updateTransductive(indices, indicesTrans, C1, C2, self.V,R_u.toarray().T,R_uTrans.toarray().T)
+                else:
+                    self.U[u,:] = np.zeros(self.d)
+
+            for i in range(self.num_items):
+                indices = self.train[:,i].nonzero()[0]
+                indicesTrans = trans_mat[:,i].nonzero()[0]
+                if indices.size:
+                    R_i = self.train[indices,i]
+                    R_iTrans = trans_mat[indicesTrans,i]
+                    self.V[i,:] = self.updateTransductive(indices, indicesTrans, C1, C2, self.U,R_i.toarray().T[0],R_iTrans.toarray().T[0])
+                else:
+                    self.V[i,:] = np.zeros(self.d)
+            if self.verbose:
+                print('end iteration',it+1)
+                
+    def updateTransductive(self,indices,indicesTrans, C1, C2, H,R,RTrans):
+        """
+        Update latent factors for a single user or item.
+        """
+        Hix = H[indices,:]
+        HixTrans = H[indicesTrans,:]
+        HH = Hix.T.dot(Hix)
+        HHTrans = HixTrans.T.dot(HixTrans)
+        M = C1 * HH + C2 * HHTrans + np.diag(self.lbda*len(R)*np.ones(self.d))
+        return np.linalg.solve(M,C1*Hix.T.dot(R)+C2*HixTrans.T.dot(RTrans)).reshape(self.d)
+   
     def linear_transfo(self,R,intercept=True):
         if intercept:
             return 1+self.alpha*R
