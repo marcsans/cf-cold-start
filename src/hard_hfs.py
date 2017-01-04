@@ -43,11 +43,11 @@ def simple_hfs(X, Y, L, W):
     labels[l_idx] = l_l
     labels[u_idx] = l_u
     
-    confidence = np.zeros(n_samples, n_classes)
-    confidence[l_idx, :] = f_l
-    confidence[u_idx, :] = f_u
+    confidence = np.vstack([np.zeros(n_samples) for i in range(int(n_classes))])
+    confidence[:,l_idx] = f_l.T
+    confidence[:,u_idx] = f_u.T
     
-    return labels + 1, confidence
+    return labels + 1, confidence.T
 
 
 def soft_hfs(X, Y, c_l, c_u, L):
