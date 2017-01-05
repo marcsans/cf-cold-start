@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[220]:
+# In[147]:
 
 get_ipython().magic('load_ext autoreload')
 get_ipython().magic('autoreload 2')
@@ -18,7 +18,7 @@ import copy
 import matplotlib.pyplot as plt
 
 
-# In[221]:
+# In[148]:
 
 def RMSE(ground, predict):
     
@@ -49,7 +49,7 @@ def meanError(ground_truth,new_res):
     return np.mean(abs((new_res - ground_truth)[ground_truth!=0]))
 
 
-# In[222]:
+# In[149]:
 
 def dictfromR(R):
 
@@ -65,7 +65,7 @@ def dictfromR(R):
     return R_dict
 
 
-# In[223]:
+# In[150]:
 
 # R = [
 #      [5,3,0,1],
@@ -82,15 +82,15 @@ R,R_dict = create_R()
 print(R_dict)
 
 
-# In[224]:
+# In[151]:
 
 num_cold = 5
-cold_movies = np.argsort([np.sum(P[i,:] for i in range(len(P)))][0])[-num_cold:]
+cold_movies = np.argsort([np.sum(R[i,:] for i in range(len(R)))][0])[-num_cold:]
 
 
-# In[225]:
+# In[152]:
 
-to_keep = 3
+to_keep = 5
 ground_truth = []
 sel = []
 for i,c in enumerate(cold_movies):
@@ -102,18 +102,18 @@ for i,c in enumerate(cold_movies):
     
 
 
-# In[226]:
+# In[153]:
 
 R_dictCopy = copy.deepcopy(R_dict)
 R_dict = dictfromR(R)
 
 
-# In[227]:
+# In[154]:
 
 np.where(R_dict['Movies'] == 321)
 
 
-# In[228]:
+# In[155]:
 
 N = len(R)
 M = len(R[0])
@@ -133,34 +133,34 @@ ans = als.fit(R_dict)
 # print(nP, "\n\n", nQ)
 
 
-# In[229]:
+# In[156]:
 
 R_rec = np.dot(als.U,np.transpose(als.V))
 
 
-# In[230]:
+# In[157]:
 
 print(RMSE(R,R_rec))
 print(RMSE(R,(R_rec-np.min(R_rec))*5/np.max(R_rec-np.min(R_rec))))
 
 
-# In[231]:
+# In[158]:
 
 for i in range(num_cold):
     print(RMSEvec(ground_truth[i], R_rec[:,321]))
 
 
-# In[232]:
+# In[159]:
 
 R
 
 
-# In[233]:
+# In[160]:
 
 np.max(R_rec)
 
 
-# In[234]:
+# In[161]:
 
 lp = LaplacianParams()
 
@@ -171,14 +171,14 @@ sim = build_graph(als.U, GraphParams())
 print(sim)
 
 
-# In[235]:
+# In[162]:
 
 L = build_laplacian(sim,lp)
 
 print(L.shape)
 
 
-# In[236]:
+# In[163]:
 
 supp = 100
 test_vec = copy.deepcopy(R[:,321])*2
@@ -186,23 +186,23 @@ test_vec = copy.deepcopy(R[:,321])*2
 test_vec.shape
 
 
-# In[237]:
+# In[164]:
 
 # test_vec
 
 
-# In[238]:
+# In[165]:
 
 hfs0, confidence = simple_hfs(als.U, test_vec, L, sim)
 # hfs0/2
 
 
-# In[239]:
+# In[166]:
 
 maxconfidences = np.array([max(confidence[i,:]) for i in range(len(confidence))])
 
 
-# In[240]:
+# In[167]:
 
 lim = np.percentile(maxconfidences, 1)
 for i in range(num_cold):
@@ -210,14 +210,14 @@ for i in range(num_cold):
     print(RMSEvec(ground_truth[i]*(maxconfidences > lim), R_rec[:,cold_movies[i]]))
 
 
-# In[241]:
+# In[168]:
 
 for i in range(num_cold):
 #     print(meanError(ground_truth[i],hfs0/2))
     print(meanError(ground_truth[i],R_rec[:,cold_movies[i]]))
 
 
-# In[242]:
+# In[169]:
 
 # elmnt = 321
 # val = []
@@ -232,7 +232,7 @@ for i in range(num_cold):
 # plt.plot(range(1,671,10),val)
 
 
-# In[243]:
+# In[170]:
 
 lhfs = []
 lconf = []
@@ -254,33 +254,33 @@ confs = np.vstack(lconf).T
 # R_barre[R_barre > 5] = 5
 
 
-# In[244]:
+# In[171]:
 
 R_barre_limited = R_barre * confs
 
 
-# In[245]:
+# In[172]:
 
-np.unique(R_barre_limited)
+sum(R_barre_limited)
 
 
-# In[246]:
+# In[173]:
 
 print(RMSE(R_barre_limited,R_rec))
 
 
-# In[247]:
+# In[174]:
 
 R_barre_final = copy.deepcopy(R_barre_limited)
 R_barre_final[R != 0] = 0
 
 
-# In[248]:
+# In[175]:
 
 # R_dict_barre = dictfromR(R_barre_final)
 
 
-# In[249]:
+# In[176]:
 
 N = len(R)
 M = len(R[0])
@@ -289,22 +289,22 @@ K = 4
 als_trans = ALS(K,N,M,"Users","Movies","Ratings",lbda = 0.1,lbda2 = 0.1)
 print("Als created")
 
-ans = als_trans.fitTransductive(R_dict,R_barre_final,C1=1,C2=0.5)
+ans = als_trans.fitTransductive(R_dict,R_barre_final,C1=1,C2=0.1)
 
 
-# In[250]:
+# In[177]:
 
 R_rec_trans = np.dot(als_trans.U,np.transpose(als_trans.V))
 print(RMSE(R_rec_trans,R_rec))
 
 
-# In[251]:
+# In[178]:
 
 for i in range(num_cold):
     print("movie "+str(i+1))
     print(RMSEvec(ground_truth[i],R_rec_trans[:,cold_movies[i]]))
     print(RMSEvec(ground_truth[i],R_rec[:,cold_movies[i]]))
-    print(RMSEvec(ground_truth[i],R_barre[:,cold_movies[i]]))
+    print(RMSEvec(R_barre_limited[:,cold_movies[i]]*(ground_truth[i]>0),ground_truth[i]))
 
 
 # 0.930864602802
@@ -319,7 +319,7 @@ for i in range(num_cold):
 # 0.97011494657
 # 1.00036650175 (95 1 0.5)
 
-# In[135]:
+# In[179]:
 
 R_barre
 
